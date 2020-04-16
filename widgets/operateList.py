@@ -1,6 +1,11 @@
+# author:Xdmony
+# contact: jerkyadmon@gmail.com
+# datetime:2020/4/16 10:14 下午
+# software: PyCharm
+# description:
 
 """
-@description: 数据挖掘和预处理菜单
+文件说明：数据预处理和数据挖掘功能选择的List控件
 """
 
 from PyQt5.QtCore import QSize, pyqtSignal

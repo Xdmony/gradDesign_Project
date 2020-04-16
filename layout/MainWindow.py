@@ -1,3 +1,12 @@
+# author:Xdmony
+# contact: jerkyadmon@gmail.com
+# datetime:2020/4/16 9:54 下午
+# software: PyCharm
+
+"""
+文件说明：程序主窗口
+"""
+
 import sys
 
 import pandas as pd
@@ -10,7 +19,7 @@ from widgets.tabs import Tabs
 from widgets.operateList import OperateList
 from widgets.dataList import List
 
-from layout.Progress import Progress
+from widgets.Progress import Progress
 import global_var
 
 from layout.data_tail import DataTail,PandasModel
@@ -154,6 +163,10 @@ class MainWindow(QWidget):
 
     # @QtCore.pyqtSlot()  #该注解会重定义slot为无参类型
     def on_listItem_click(self,dataName):
+        """
+        :param dataName: 所选择数据集的name
+        :return:
+        """
         df = global_var.dataMap[dataName].data
         tab = DataTail()
         model = PandasModel(df)
@@ -162,11 +175,20 @@ class MainWindow(QWidget):
 
     @QtCore.pyqtSlot()
     def on_listItem_doubleclick(self):
+        """
+        :param
+        :return:
+        """
         pass
 
+#
     def operateChoose(self,operateName):
-        #operate为所选择操作名，可以为之创建tab
-        tab = QTabWidget() #所选操作对应tab
+        """
+        功能模块选择后，添加对应tab
+        :param operateName: 所选择操作的名称，在global_var中有存储
+        :return:
+        """
+        tab = QWidget()   #添加功能需要设置的tab界面，需要根据不同的操作设置不同的tab，tab中必须设置[添加]按钮以将操作添加至任务
         self.tabs.add_Tab(tab,operateName)
 
 if __name__ == '__main__':

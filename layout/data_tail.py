@@ -1,3 +1,13 @@
+# author:Xdmony
+# contact: jerkyadmon@gmail.com
+# datetime:2020/4/16 10:17 下午
+# software: PyCharm
+# description:
+
+"""
+文件说明：数据集详情
+"""
+
 from PyQt5 import QtCore
 import pandas as pd
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTableView

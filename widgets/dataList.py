@@ -1,6 +1,13 @@
+# author:Xdmony
+# contact: jerkyadmon@gmail.com
+# datetime:2020/4/16 10:11 下午
+# software: PyCharm
+# description:
+
 """
-@description: 数据集List，用于选择输入输出数据集
+文件说明：显示输入输出数据集的List控件
 """
+
 
 from PyQt5.QtCore import QSize, pyqtSignal
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QPushButton, QWidget, QHBoxLayout, QTabWidget
@@ -25,6 +32,10 @@ class List(QListWidget):
         dataName = self.sender().text()
         self.update_.emit(dataName)
 
+
+"""
+测试用
+"""
 class Window(QWidget):
     def __init__(self):
         super(Window,self).__init__()
@@ -38,9 +49,10 @@ class Window(QWidget):
 
         self.setLayout(layout)
 
-    def click_test(self,txt):
+    def click_test(self, txt):
         tab = QWidget()
         self.tabs.addTab(tab,txt)
+
 
 if __name__ == '__main__':
     import sys

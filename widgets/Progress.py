@@ -1,3 +1,13 @@
+# author:Xdmony
+# contact: jerkyadmon@gmail.com
+# datetime:2020/4/16 10:21 下午
+# software: PyCharm
+# description:
+
+"""
+文件说明：任务列表，显示已添加操作
+"""
+
 import sys
 
 from PyQt5.QtCore import QSize, Qt
