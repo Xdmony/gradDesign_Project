@@ -9,9 +9,7 @@ class Progress(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.list = QListWidget()
-        # self.list.isLeftToRight()
         self.list.setFlow(QListView.LeftToRight)
-        # self.list.setFocusProxy(Qt.NoFocus)
 
         item1 = QListWidgetItem()
         item1.setSizeHint(size)

@@ -3,13 +3,17 @@ import sys
 import pandas as pd
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, \
-    QVBoxLayout, QTextEdit, QPushButton, QListWidget, QLabel, QTabWidget, \
-    QListWidgetItem, QFileDialog, QDialog,QLineEdit
+    QVBoxLayout, QPushButton,  QLabel, QTabWidget, \
+     QFileDialog, QDialog,QLineEdit
 from PyQt5 import QtCore
+from widgets.tabs import Tabs
+from widgets.operateList import OperateList
+from widgets.dataList import List
 
-from layout.Opreation import Opreation
 from layout.Progress import Progress
 import global_var
+
+from layout.data_tail import DataTail,PandasModel
 
 list_itemSize = QSize(100,30)
 
@@ -17,20 +21,6 @@ class MainWindow(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.resize(1080,720)
-
-        #widget测试用(textedit)
-        # text_test_up = QTextEdit("up")
-        # text_test_down = QTextEdit("down")
-        # up_m_temp = QTextEdit("progress")
-        # down_r_temp = QTextEdit("opreation")
-        tab1 = QTextEdit("tab1 test")
-        tab2 = QWidget()
-        tab3 = QWidget()
-        # label_data = QLabel("dataSet1")
-        # label_data.setAlignment(Qt.AlignCenter)
-        set1 = QListWidgetItem()
-        set1.setSizeHint(list_itemSize)
-        dataSet1 = QPushButton("dataSet1")
 
     #上方布局
         #left(up_l)
@@ -52,12 +42,11 @@ class MainWindow(QWidget):
         self.label_in = QLabel("输入数据")
         self.label_in.setAlignment(Qt.AlignCenter)
         self.label_in.setContentsMargins(5,5,5,0)
-        self.list_in = QListWidget()
-        self.list_in.addItem(set1)
-        self.list_in.setItemWidget(set1,dataSet1)
+        self.list_in = List()
         self.label_out = QLabel("输出数据")
         self.label_out.setAlignment(Qt.AlignCenter)#居中对齐
-        self.list_out = QListWidget()
+        self.list_out = List()
+        self.list_in.update_.connect(self.on_listItem_click)
         down_l.addWidget(self.label_in)
         down_l.addWidget(self.list_in)
         down_l.addWidget(self.label_out)
@@ -66,25 +55,16 @@ class MainWindow(QWidget):
         down_l.setStretch(1,7)
         down_l.setStretch(2,1)
         down_l.setStretch(3,7)
-        # down_l.setContentsMargins(5,5,5,0)
         down_l.setSpacing(0)
         #middle(tabs)
-        self.tabs = QTabWidget()
-        self.tabs.setTabShape(QTabWidget.Triangular)
-        self.tabs.setDocumentMode(True)
-        self.tabs.setMovable(True)
-        self.tabs.setTabsClosable(True)
-        self.tabs.tabCloseRequested.connect(self.close_tab)
-        self.tabs.addTab(tab1,"tab1")
-        self.tabs.addTab(tab2,"tab2")
-        self.tabs.addTab(tab3,"tab3")
+        self.tabs = Tabs()
         #right
-        self.oprea = Opreation()
+        self.oprea = OperateList()
+        self.oprea.clickBtn_.connect(self.operateChoose)
 
     #设置UI上下方布局为水平布局
         #up
         layout_up = QHBoxLayout()
-        # layout_up.addWidget(text_test_up)
         layout_up.addLayout(up_l)
         layout_up.addWidget(progress)
         layout_up.addWidget(self.btn_run)
@@ -112,14 +92,7 @@ class MainWindow(QWidget):
 
         self.setLayout(layout_main)
 
-    @QtCore.pyqtSlot()
-    def close_tab(self,index):
-        self.tabs.removeTab(index)
-
-    @QtCore.pyqtSlot()
-    def add_tab(self,tab,title):
-        self.tabs.addTab(tab,title)
-
+    #数据导入
     @QtCore.pyqtSlot()
     def data_local(self):
         fileName,fileType = QFileDialog.getOpenFileName(self,'选择文件','','*.csv')
@@ -151,18 +124,14 @@ class MainWindow(QWidget):
 
     @QtCore.pyqtSlot()
     def on_ok_click(self):
-        #命名数据集
-        dataSetItem = QPushButton(self.lineText.text())#输入数据Item
-        global_var.dataSet["dataName"] = self.lineText.text()
-        global_var.dataSet["data"] = pd.read_csv(global_var.filePath)
-        global_var.dataSet["Path"] = global_var.filePath
+        #命名数据集并保存
+        global_var.dataSet.isLocal = True
+        global_var.dataSet.name = self.lineText.text()
+        global_var.dataSet.data = pd.read_csv(global_var.filePath)
         dataSet = global_var.dataSet
         global_var.dataList.append(dataSet)
         global_var.dataMap[self.lineText.text()] = dataSet
-        listItem = QListWidgetItem()
-        listItem.setSizeHint(list_itemSize)
-        self.list_in.addItem(listItem)
-        self.list_in.setItemWidget(listItem,dataSetItem)
+        self.list_in.add_item(self.lineText.text())
         self.dialog.close()
 
     @QtCore.pyqtSlot()
@@ -173,8 +142,8 @@ class MainWindow(QWidget):
     @QtCore.pyqtSlot()
     def data_db(self):
         pass
-        # print(global_var.filePath)
 
+    #运行任务，任务流可以从global_var获取
     @QtCore.pyqtSlot()
     def run(self):
         pass
@@ -182,6 +151,23 @@ class MainWindow(QWidget):
     @QtCore.pyqtSlot()
     def exit(self):
         pass
+
+    # @QtCore.pyqtSlot()  #该注解会重定义slot为无参类型
+    def on_listItem_click(self,dataName):
+        df = global_var.dataMap[dataName].data
+        tab = DataTail()
+        model = PandasModel(df)
+        tab.dataTable.setModel(model)
+        self.tabs.add_Tab(tab,dataName)
+
+    @QtCore.pyqtSlot()
+    def on_listItem_doubleclick(self):
+        pass
+
+    def operateChoose(self,operateName):
+        #operate为所选择操作名，可以为之创建tab
+        tab = QTabWidget() #所选操作对应tab
+        self.tabs.add_Tab(tab,operateName)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
