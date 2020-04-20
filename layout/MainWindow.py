@@ -21,8 +21,7 @@ from widgets.Progress import Progress
 import global_var
 from layout.data_tail import DataTail,PandasModel
 from data_mining.linear_regression_UI import Linear
-from data_mining.linear_regression_out import LR_out
-import data_mining.linear_regression as lr
+import task.taskController as task
 
 list_itemSize = QSize(100,30)
 
@@ -43,6 +42,8 @@ class MainWindow(QWidget):
         #right
         self.btn_run = QPushButton("运行")
         self.btn_run.clicked.connect(self.run)
+        self.btn_clear = QPushButton("Clear")
+        self.btn_clear.clicked.connect(self.on_btn_clear_clicked)
         self.btn_exit = QPushButton("退出")
         self.btn_exit.clicked.connect(QCoreApplication.quit)
         self.btn_local.clicked.connect(self.data_local)
@@ -58,6 +59,7 @@ class MainWindow(QWidget):
         self.label_out.setAlignment(Qt.AlignCenter)#居中对齐
         self.list_out = List()
         self.list_in.update_.connect(self.on_listItem_click)
+        self.list_out.update_.connect(self.on_listOutItem_click)
         down_l.addWidget(self.label_in)
         down_l.addWidget(self.list_in)
         down_l.addWidget(self.label_out)
@@ -79,11 +81,13 @@ class MainWindow(QWidget):
         layout_up.addLayout(up_l)
         layout_up.addWidget(self.progress)
         layout_up.addWidget(self.btn_run)
+        # layout_up.addWidget(self.btn_clear)
         layout_up.addWidget(self.btn_exit)
         layout_up.setStretch(0,2)
         layout_up.setStretch(1,8)
         layout_up.setStretch(2,1)
         layout_up.setStretch(3,1)
+        layout_up.setStretch(4,1)
         #down
         layout_down = QHBoxLayout()
         # layout_down.addWidget(text_test_down)
@@ -159,11 +163,15 @@ class MainWindow(QWidget):
     #运行任务，任务流可以从global_var获取
     @QtCore.pyqtSlot()
     def run(self):  #待修改，暂时只完成线性回归
-        task = global_var.taskData
-        lr.linear_regression(task.data,global_var.scale)
-        self.list_out.add_item(global_var.currentDataSet.name+':'+global_var.regressionBtnList[0])
-        tab = LR_out()
-        self.tabs.add_Tab(tab,"输出数据")
+        tab,title = task.task_run()
+        global_var.taskData.dataTab = tab
+        dataName = global_var.taskData.dataSet.name
+        global_var.taskList[dataName+':'+title] = global_var.taskData #任务数据存储
+        self.list_out.add_item(dataName+':'+title)
+        self.tabs.add_Tab(tab,dataName+global_var.taskList[dataName].data_mining)
+
+    def on_btn_clear_clicked(self):
+        self.progress = Progress()
 
     # @QtCore.pyqtSlot()  #该注解会重定义slot为无参类型
     def on_listItem_click(self,dataName):
@@ -179,13 +187,14 @@ class MainWindow(QWidget):
         tab.dataTable.setModel(model)
         self.tabs.add_Tab(tab,dataName)
 
-    @QtCore.pyqtSlot()
-    def on_listItem_doubleclick(self):
+    # @QtCore.pyqtSlot()
+    def on_listOutItem_click(self,key):
         """
         :param
         :return:
         """
-        pass
+        tab = global_var.taskList[key].dataTab
+        self.tabs.add_Tab(tab,key)
 
 #
     def operateChoose(self,operateName):
@@ -205,13 +214,13 @@ class MainWindow(QWidget):
             tab = QWidget()
         elif operateName==global_var.preBtnList[4]:
             tab = QWidget()
-        elif operateName==global_var.associationBtnList[0]:
+        elif operateName==global_var.associationBtnList[0]: #关联规则
             tab = QWidget()
-        elif operateName==global_var.classificationBtnList[0]:
+        elif operateName==global_var.classificationBtnList[0]:  #分类分析
             tab = QWidget()
-        elif operateName==global_var.clusterBtnList[0]:
+        elif operateName==global_var.clusterBtnList[0]:     #聚类分析
             tab = QWidget()
-        elif operateName==global_var.regressionBtnList[0]:#线性回归
+        elif operateName==global_var.regressionBtnList[0]:      #回归分析
             tab = Linear()
             tab.add_.connect(self.addTask)
         elif operateName==global_var.visualBtnList[0]:

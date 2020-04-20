@@ -132,7 +132,9 @@ class DataTail(QWidget):
         global_var.taskData.X = X
         global_var.taskData.y = y
         global_var.taskData.data = data
-        txt = global_var.currentDataSet.name
+        global_var.taskData.dataSet = global_var.currentDataSet
+        txt = global_var.taskData.dataSet.name
+        global_var.taskList[global_var.taskData.dataSet.name] = global_var.taskData     #保存任务数据到taskList字典
         self.add_.emit(txt)
 
 class DataTail_Out(QWidget):

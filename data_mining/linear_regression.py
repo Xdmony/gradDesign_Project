@@ -34,4 +34,3 @@ def linear_regression(data,scale):
     global_var.taskData.model = model       #线性回归model保存
     global_var.taskData.data_in = data_in
     global_var.taskData.data_out = data_out
-    global_var.taskList[global_var.currentDataSet.name] = global_var.taskData

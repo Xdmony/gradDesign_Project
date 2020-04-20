@@ -11,32 +11,36 @@
 
 class DataSet():
     def __init__(self):
-        self.name=None
-        self.data=None
-        self.isLocal = True
+        self.name=None          #数据集ID
+        self.data=None          #数据
+        self.isLocal = True     #是否是本地文件
         self.path = None#本地文件才有路径
         # if not self.isLocal:
         #     self.path = None
 
 class Task():
     def __init__(self):
-        self.X = None       #list X
-        self.y = None       #String y
-        self.data = None    #数据集（不能为空）
+        self.X = None           #list X
+        self.y = None           #String y
+        self.dataSet = None     #原始数据集
+        self.data = None        #数据集（不能为空），数据处理的输入（DataFrame）
+        self.scale = None       #样本占比
         self.pretreat = None    #预处理
-        self.data_mining = None     #数据挖掘
+        self.data_mining = None #数据挖掘
         self.visual = None      #数据可视化
-        self.model = None
-        self.data_in = None
-        self.data_out = None
+        self.model = None       #数据挖掘model
+        self.data_in = None     #测试集
+        self.data_out = None    #预测值
+        self.dataTab = None     #输出数据tab
+        self.pretreatData = None                        #数据预处理输出数据
 
 #当前使用的数据集
 currentDataSet = None
 
-#数据集(currentDataSet)
+#数据集(currentDataSet)，当前数据集指针
 dataSet = DataSet()
 
-#任务流数据
+#任务流数据          当前任务指针
 taskData = Task()
 
 #文件路径只在本地读取文件的时候使用，其他模块使用dataSet.path访问本地原始数据
@@ -45,7 +49,7 @@ filePath = ""
 #数据集列表
 dataList = list()
 
-#输入和输出数据集，数据类型为DataSet
+#输入和输出数据集，数据类型为DataSet {dataName:dataSet}
 dataSetInput = dict()
 dataSetOutput = dict()
 
@@ -69,4 +73,4 @@ y_predict = None
 data_test = None
 data_predict = None
 
-taskList = dict()
+taskList = dict()   #存储任务数据，{dataName:taskData}，根据输出数据集查询
