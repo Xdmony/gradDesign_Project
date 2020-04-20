@@ -10,19 +10,19 @@
 import sys
 
 import pandas as pd
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize,QCoreApplication
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, \
-    QVBoxLayout, QPushButton,  QLabel, QTabWidget, \
-     QFileDialog, QDialog,QLineEdit
+    QVBoxLayout, QPushButton,  QLabel, QFileDialog, QDialog,QLineEdit
 from PyQt5 import QtCore
 from widgets.tabs import Tabs
 from widgets.operateList import OperateList
 from widgets.dataList import List
-
 from widgets.Progress import Progress
 import global_var
-
 from layout.data_tail import DataTail,PandasModel
+from data_mining.linear_regression_UI import Linear
+from data_mining.linear_regression_out import LR_out
+import data_mining.linear_regression as lr
 
 list_itemSize = QSize(100,30)
 
@@ -39,10 +39,12 @@ class MainWindow(QWidget):
         up_l.addWidget(self.btn_local)
         up_l.addWidget(self.btn_db)
         #middle
-        progress = Progress()
+        self.progress = Progress()
         #right
         self.btn_run = QPushButton("运行")
+        self.btn_run.clicked.connect(self.run)
         self.btn_exit = QPushButton("退出")
+        self.btn_exit.clicked.connect(QCoreApplication.quit)
         self.btn_local.clicked.connect(self.data_local)
 
     #下方布局
@@ -75,7 +77,7 @@ class MainWindow(QWidget):
         #up
         layout_up = QHBoxLayout()
         layout_up.addLayout(up_l)
-        layout_up.addWidget(progress)
+        layout_up.addWidget(self.progress)
         layout_up.addWidget(self.btn_run)
         layout_up.addWidget(self.btn_exit)
         layout_up.setStretch(0,2)
@@ -137,7 +139,9 @@ class MainWindow(QWidget):
         global_var.dataSet.isLocal = True
         global_var.dataSet.name = self.lineText.text()
         global_var.dataSet.data = pd.read_csv(global_var.filePath)
+        global_var.dataSet.path = global_var.filePath
         dataSet = global_var.dataSet
+        global_var.currentDataSet = dataSet
         global_var.dataList.append(dataSet)
         global_var.dataMap[self.lineText.text()] = dataSet
         self.list_in.add_item(self.lineText.text())
@@ -154,12 +158,12 @@ class MainWindow(QWidget):
 
     #运行任务，任务流可以从global_var获取
     @QtCore.pyqtSlot()
-    def run(self):
-        pass
-
-    @QtCore.pyqtSlot()
-    def exit(self):
-        pass
+    def run(self):  #待修改，暂时只完成线性回归
+        task = global_var.taskData
+        lr.linear_regression(task.data,global_var.scale)
+        self.list_out.add_item(global_var.currentDataSet.name+':'+global_var.regressionBtnList[0])
+        tab = LR_out()
+        self.tabs.add_Tab(tab,"输出数据")
 
     # @QtCore.pyqtSlot()  #该注解会重定义slot为无参类型
     def on_listItem_click(self,dataName):
@@ -167,8 +171,10 @@ class MainWindow(QWidget):
         :param dataName: 所选择数据集的name
         :return:
         """
-        df = global_var.dataMap[dataName].data
+        global_var.currentDataSet = global_var.dataMap[dataName]
+        df = global_var.currentDataSet.data
         tab = DataTail()
+        tab.add_.connect(self.addTaskData)
         model = PandasModel(df)
         tab.dataTable.setModel(model)
         self.tabs.add_Tab(tab,dataName)
@@ -188,8 +194,46 @@ class MainWindow(QWidget):
         :param operateName: 所选择操作的名称，在global_var中有存储
         :return:
         """
-        tab = QWidget()   #添加功能需要设置的tab界面，需要根据不同的操作设置不同的tab，tab中必须设置[添加]按钮以将操作添加至任务
+        #添加功能需要设置的tab界面，需要根据不同的操作设置不同的tab，tab中必须设置[添加]按钮以将操作添加至任务
+        if operateName==global_var.preBtnList[0]:
+            tab = QWidget()
+        elif operateName==global_var.preBtnList[1]:
+            tab = QWidget()
+        elif operateName==global_var.preBtnList[2]:
+            tab = QWidget()
+        elif operateName==global_var.preBtnList[3]:
+            tab = QWidget()
+        elif operateName==global_var.preBtnList[4]:
+            tab = QWidget()
+        elif operateName==global_var.associationBtnList[0]:
+            tab = QWidget()
+        elif operateName==global_var.classificationBtnList[0]:
+            tab = QWidget()
+        elif operateName==global_var.clusterBtnList[0]:
+            tab = QWidget()
+        elif operateName==global_var.regressionBtnList[0]:#线性回归
+            tab = Linear()
+            tab.add_.connect(self.addTask)
+        elif operateName==global_var.visualBtnList[0]:
+            tab = QWidget()
         self.tabs.add_Tab(tab,operateName)
+
+    def addTaskData(self,dataName):
+        """
+        添加数据集到任务流
+        :param taskName: 数据集
+        :return:
+        """
+        self.progress.addTask(dataName)
+
+    def addTask(self,taskname):
+        """
+        添加任务
+        :param taskname:
+        :return:
+        """
+        self.progress.addTask(taskname)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
